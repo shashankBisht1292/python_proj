@@ -1,12 +1,13 @@
 from django.urls import path
 #from .views import article_list, article_detail
 #from .views import ArticleAPIView, ArticleAPIDetail
-from .views import ViewSetView
+from .views import GenericViewSetView
 from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()
-router.register('articles', ViewSetView, basename='arti')
+#router.register('articles', ViewSetView, basename='arti')
+router.register('articles', GenericViewSetView, basename='arti')
 urlpatterns = router.urls
 
 
