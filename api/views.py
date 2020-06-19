@@ -1,29 +1,42 @@
-from rest_framework import generics
-from rest_framework import mixins
-from rest_framework.response import Response
 from .models import Article
 from .serializers import ArticleSerializer
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
-class GenericAPIView(generics.GenericAPIView, mixins.ListModelMixin,
-                     mixins.CreateModelMixin, mixins.UpdateModelMixin,
-                     mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
-    serializer_class = ArticleSerializer
-    queryset = Article.objects.all()
+class ViewSetView(viewsets.ViewSet):
 
-    lookup_field = 'pk'
+    def list(self, request):
+        articles = Article.objects.all()
+        serializer = ArticleSerializer(articles, many=True)
+        return Response(serializer.data)
 
-    def get(self, request, pk=None):
+    def create(self, request):
+        serializer = ArticleSerializer(data=request.data)
 
-        if pk:
-            return self.retrieve(pk)
-        else:
-            return self.list(request)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request):
-        return self.create(request)
+    def retrieve(self, request, pk=None):
+        #queryset = Article.objects.all()
 
-    def put(self, request, pk=None):
-        return self.update(request, pk)
+        #article = get_object_or_404(queryset, pk=pk)
+        article = Article.objects.get(pk=pk)
+        serializer = ArticleSerializer(article)
+        return Response(serializer.data)
 
-    def delete(self, request, pk=None):
-        return self.destroy(request, pk)
+    def update(self, request, pk=None):
+        article = Article.objects.get(pk=pk)
+        serializer = ArticleSerializer(article, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        article = Article.objects.get(pk=pk)
+        article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

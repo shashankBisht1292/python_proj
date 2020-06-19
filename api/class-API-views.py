@@ -30,9 +30,6 @@ class ArticleAPIDetail(APIView):
 
     def get(self, request, pk):
         article = self.get_article_content(pk)
-        print('----------')
-        print(type(article))
-        print('----------')
         serializer = ArticleSerializer(article)
         return Response(serializer.data)
 
